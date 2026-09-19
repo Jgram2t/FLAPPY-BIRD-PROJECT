@@ -96,11 +96,11 @@ module hvsync_generator (
     // Sync is active LOW.
     // ============================================================
 
-assign hsync =
-    ~(
-        (h_count >= H_DISPLAY + H_FRONT + 1) &&
-        (h_count <  H_DISPLAY + H_FRONT + H_SYNC + 1)
-    );
+    assign hsync =
+        ~(
+            (h_count >= H_DISPLAY + H_FRONT + 1) &&
+            (h_count <  H_DISPLAY + H_FRONT + H_SYNC + 1)
+        );
 
 
     // ============================================================
@@ -115,9 +115,9 @@ assign hsync =
     // ============================================================
 
     assign vsync =
-        !(
-            (v_count >= 10'd490) &&
-            (v_count <  10'd492)
+        ~(
+            (v_count >= V_DISPLAY + V_FRONT + 1) &&
+            (v_count <  V_DISPLAY + V_FRONT + V_SYNC + 1)
         );
 
 endmodule

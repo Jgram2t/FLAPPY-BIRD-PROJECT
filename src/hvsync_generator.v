@@ -116,8 +116,8 @@ module hvsync_generator (
 
     assign vsync =
         ~(
-            (v_count >= V_DISPLAY + V_FRONT + 1) &&
-            (v_count <  V_DISPLAY + V_FRONT + V_SYNC + 1)
+            (v_count >= V_DISPLAY + V_FRONT) &&
+            (v_count <  V_DISPLAY + V_FRONT + V_SYNC)
         );
 
 endmodule

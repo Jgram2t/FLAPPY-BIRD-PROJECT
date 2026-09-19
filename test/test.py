@@ -87,15 +87,22 @@ async def test_project(dut):
         framebuffer = bytearray(V_DISPLAY*H_DISPLAY*3)
         for j in range(V_DISPLAY):
             dut._log.info(f"Frame {frame_num}, line {j} (display)")
-            line = await capture_line(framebuffer, 3*j*H_DISPLAY)
+            await capture_line(framebuffer, 3*j*H_DISPLAY)
         if check_sync:
-            for j in range(j, j+V_FRONT):
+            front_start = V_DISPLAY
+            front_end = front_start + V_FRONT
+            sync_start = front_end
+            sync_end = sync_start + V_SYNC
+            back_start = sync_end
+            back_end = V_TOTAL
+
+            for j in range(front_start, front_end):
                 dut._log.info(f"Frame {frame_num}, line {j} (front porch)")
                 await check_line(1)
-            for j in range(j, j+V_SYNC):
+            for j in range(sync_start, sync_end):
                 dut._log.info(f"Frame {frame_num}, line {j} (sync pulse)")
                 await check_line(0)
-            for j in range(j, j+V_BACK):
+            for j in range(back_start, back_end):
                 dut._log.info(f"Frame {frame_num}, line {j} (back porch)")
                 await check_line(1)
         else:

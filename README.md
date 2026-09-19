@@ -4,10 +4,27 @@
 
 - [Read the documentation for project](docs/info.md)
 
-## What is Tiny Tapeout?
+# Flappy Bird FPGA
 
-Tiny Tapeout is an educational project that aims to make it easier and cheaper than ever to get your digital and analog designs manufactured on a real chip.
+## Description
 
+This project is a hardware-based implementation of the classic **Flappy Bird** game using Verilog HDL and an FPGA. The game generates a VGA display showing the bird, pipes, sky, and ground. The design uses VGA synchronization signals to control the display and updates the game elements in real time.
+
+The player controls the bird by providing a **flap input**. Each flap makes the bird move upward, while gravity continuously pulls it downward. The player must control the bird's movement to pass through the gaps between the pipes without hitting the pipes, ceiling, or ground.
+
+## Design
+
+The design consists of a VGA synchronization module and the main game logic. The VGA synchronization module generates the horizontal and vertical counters, `hsync`, `vsync`, and the current pixel position used for drawing the game.
+
+The main game module handles:
+
+- Bird movement and gravity
+- Flap input detection
+- Pipe movement
+- Collision detection
+- Game-over state
+- VGA pixel rendering
+- Game restart
 To learn more and get started, visit https://tinytapeout.com.
 
 ## Set up your Verilog project

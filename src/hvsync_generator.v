@@ -69,55 +69,71 @@ module hvsync_generator (
 
 
     // ============================================================
-    // Current pixel position
+    // Combinational sync / blanking from the counters (no fudge
+    // offsets here - plain, direct comparisons)
     // ============================================================
 
-    assign hpos = h_count;
-    assign vpos = v_count;
+    wire hsync_comb =
+        ~(
+            (h_count >= H_DISPLAY + H_FRONT) &&
+            (h_count <  H_DISPLAY + H_FRONT + H_SYNC)
+        );
 
+    wire vsync_comb =
+        ~(
+            (v_count >= V_DISPLAY + V_FRONT) &&
+            (v_count <  V_DISPLAY + V_FRONT + V_SYNC)
+        );
 
-    // ============================================================
-    // Visible area
-    // ============================================================
-
-    assign display_on =
+    wire display_on_comb =
         (h_count < H_DISPLAY) &&
         (v_count < V_DISPLAY);
 
 
     // ============================================================
-    // Horizontal sync
+    // Register the outputs one clock behind the counters.
     //
-    // 640 visible
-    // 16 front porch
-    // 96 sync
-    // 48 back porch
-    //
-    // Sync is active LOW.
+    // h_count and v_count update on the SAME edge at the line wrap
+    // (h_count 799->0 together with v_count incrementing), so an
+    // unregistered vsync can appear to change one cycle "early"
+    // relative to how a testbench samples it. Registering every
+    // output together (sync, blanking and position) keeps them
+    // all self-consistent and gives one single, predictable
+    // update point per signal.
     // ============================================================
 
-    assign hsync =
-        ~(
-            (h_count >= H_DISPLAY + H_FRONT + 1) &&
-            (h_count <  H_DISPLAY + H_FRONT + H_SYNC + 1)
-        );
+    reg hsync_r;
+    reg vsync_r;
+    reg display_on_r;
+    reg [9:0] hpos_r;
+    reg [9:0] vpos_r;
 
+    always @(posedge clk or posedge reset) begin
 
-    // ============================================================
-    // Vertical sync
-    //
-    // 480 visible
-    // 10 front porch
-    // 2 sync
-    // 33 back porch
-    //
-    // Sync is active LOW.
-    // ============================================================
+        if (reset) begin
 
-    assign vsync =
-        ~(
-            (v_count >= V_DISPLAY + V_FRONT) &&
-            (v_count <  V_DISPLAY + V_FRONT + V_SYNC)
-        );
+            hsync_r      <= 1'b1;
+            vsync_r      <= 1'b1;
+            display_on_r <= 1'b0;
+            hpos_r       <= 10'd0;
+            vpos_r       <= 10'd0;
+
+        end else begin
+
+            hsync_r      <= hsync_comb;
+            vsync_r      <= vsync_comb;
+            display_on_r <= display_on_comb;
+            hpos_r       <= h_count;
+            vpos_r       <= v_count;
+
+        end
+
+    end
+
+    assign hsync       = hsync_r;
+    assign vsync       = vsync_r;
+    assign display_on  = display_on_r;
+    assign hpos        = hpos_r;
+    assign vpos        = vpos_r;
 
 endmodule
